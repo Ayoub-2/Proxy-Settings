@@ -73,6 +73,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [ "$clean" == "0" ]; then
+	echo "cleaning .. : "
+	git config --global --unset http.proxy
+	git config --global --unset https.proxy
+	echo '' > /etc/apt/apt.conf 
+	echo '' > /etc.gemrc
+	sed "/http:|socks:|https:/d" /etc/environment > /tmp/env  ; cat /tmp/env > /etc/environment
+	source /etc/environment
+	echo "cleaned !! "
+	exit 
+fi
 if [[ -z ${ip+x} || -z ${port+x} || -z ${typ+x} ]]	
 then 
 	echo "Please see help manual"
@@ -88,17 +99,6 @@ service networking restart
 echo "Lhost IPs: "
 ip add sh | grep '\binet ([0-9]{1,3}\.){3}[0-9]{1,3}' -oE | cat
 
-if [ "$clean" == "0" ]; then
-	echo "cleaning .. : "
-	git config --global --unset http.proxy
-	git config --global --unset https.proxy
-	echo '' > /etc/apt/apt.conf 
-	echo '' > /etc.gemrc
-	sed "/http:|socks:|https:/d" /etc/environment > /tmp/env  ; cat /tmp/env > /etc/environment
-	source /etc/environment
-	echo "cleaned !! "
-	exit 
-fi
 
 # reset all : 
 git config --global --unset http.proxy
