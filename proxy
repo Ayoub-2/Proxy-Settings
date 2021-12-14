@@ -21,6 +21,11 @@ then
 	echo "try -h|--help"
 	exit
 fi
+if [ "$1" == "--version" ]
+then
+	echo "$(basename $0) version 1.0"
+	exit 	
+fi
 if [[ "$1" == "--help" || "$1" == "-h" ]]
 then 
 	echo "$__usage"
