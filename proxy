@@ -1,0 +1,132 @@
+#!/bin/bash
+__usage="
+Usage: $(basename $0) -i ip -p port -t http -e 
+Options:
+  -i, --ip 10.23.201.11        the proxy IP
+  -p, --port 3128              the proxy port
+  -t, --type http|https|socks5 the type of proxy
+  -e, --env                    set the environment flag to True (this will make all the terminals use the same proxy)
+  --default                    use default options
+  --clean                      clean all settings
+  -h, --help                   help maual
+  -v, --version                Get version
+
+
+Example: 
+	proxy -i 10.23.201.11 -p 3128 -t http 
+"
+if [ $# -eq 0 ]
+then 
+	echo "no arguments supplied"
+	echo "try -h|--help"
+	exit
+fi
+if [[ "$1" == "--help" || "$1" == "-h" ]]
+then 
+	echo "$__usage"
+	exit 
+fi 	
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -c|--clean)
+      clean=0
+      shift
+      ;;
+    -i|--ip)
+      ip=$2
+      shift
+      shift 
+      ;;
+    -p|--port)
+      port=$2
+      shift
+      shift 
+      ;;
+    -e|--env)
+      env=1
+      shift 
+      shift 
+      ;;
+    -t|--type)
+      typ="$2"
+      shift
+      shift
+      ;;
+    --default)
+      ip=10.23.201.11
+      port=3128
+      env=0
+      typ=http
+      shift 
+      ;;
+    *)  
+      POSITIONAL+=("$1") 
+      shift 
+      ;;
+  esac
+done
+
+if [[ -z ${ip+x} || -z ${port+x} || -z ${typ+x} ]]	
+then 
+	echo "Please see help manual"
+	echo "arguments are not enough"
+	exit
+fi
+if [ -z ${env+x} ]
+then 
+	env=0
+fi
+
+service networking restart
+echo "Lhost IPs: "
+ip add sh | grep '\binet ([0-9]{1,3}\.){3}[0-9]{1,3}' -oE | cat
+
+if [ "$clean" == "0" ]; then
+	echo "cleaning .. : "
+	git config --global --unset http.proxy
+	git config --global --unset https.proxy
+	echo '' > /etc/apt/apt.conf 
+	echo '' > /etc.gemrc
+	sed "/http:|socks:|https:/d" /etc/environment > /tmp/env  ; cat /tmp/env > /etc/environment
+	source /etc/environment
+	echo "cleaned !! "
+	exit 
+fi
+
+# reset all : 
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+echo '' > /etc/apt/apt.conf 
+echo '' > /etc.gemrc
+sed "/http:|socks:|https/d" -E  /etc/environment > /tmp/env
+cat /tmp/env > /etc/environment
+
+mkdir /tmp/proxy
+touch /tmp/proxy/apt.conf
+touch /tmp/proxy/environment
+touch /tmp/proxy/.gemrc
+
+types=( $(echo "$typ" | sed 's/,/ /g') )
+for tp in "${types[@]}" 
+do
+# git
+	git config --global $tp.proxy $tp://$ip:$port
+
+# apt
+	printf "Acquire::%s::proxy '%s://%s:%s/';\n" "$tp" "$tp" "$ip" "$port" >> /tmp/proxy/apt.conf
+
+# gem 
+	printf "%s_proxy: %s://%s:%s\n" "$tp" "$tp" "$ip" "$port" > /tmp/proxy/.gemrc
+
+if [ "$env" == "1" ]; then 
+	echo "Environment"
+	echo "export %s_proxy=%s://%s:%s\n" "$tp" "$tp" "$ip" "$port" >> /tmp/proxy/environment
+	source /tmp/proxy/environment
+fi
+done
+
+cat /tmp/proxy/apt.conf > /etc/apt/apt.conf
+cat /tmp/proxy/.gemrc > /etc/.gemrc
+cat /tmp/proxy/environment > /etc/environment
