@@ -14,7 +14,7 @@ cp ./proxy /usr/bin/local/proxy
 chmod +x /usr/bin/local/proxy
 ```
 ## Manual 
-```bash 
+``` 
 $proxy --help
 Usage: proxy -i ip -p port -t http -e 
 Options:
