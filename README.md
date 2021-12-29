@@ -1,4 +1,4 @@
-# Linux Settings for proxy 
+# Proxy Settings for Linux 
 I always suffer from switching to my academy network or any network using local proxy while using any linux based systems, i have to configure my package manager , my programms like git , curl , wget ...
 it's really a Headache, so i thougth i could juste create a script that easily switch between network with or without proxies.
 ## Installation 
