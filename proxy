@@ -120,7 +120,7 @@ do
 	git config --global $tp.proxy $tp://$ip:$port
 
 # apt
-	printf "Acquire::%s::proxy '%s://%s:%s/';\n" "$tp" "$tp" "$ip" "$port" >> /tmp/proxy/apt.conf
+	printf "Acquire::%s::proxy \"%s://%s:%s/\";\n" "$tp" "$tp" "$ip" "$port" >> /tmp/proxy/apt.conf
 
 # gem 
 	printf "%s_proxy: %s://%s:%s\n" "$tp" "$tp" "$ip" "$port" > /tmp/proxy/.gemrc
