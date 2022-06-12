@@ -77,6 +77,7 @@ if [ "$clean" == "0" ]; then
 	echo "cleaning .. : "
 	git config --global --unset http.proxy
 	git config --global --unset https.proxy
+  pip config unset global.proxy
 	echo '' > /etc/apt/apt.conf 
 	echo '' > /etc.gemrc
 	sed "/http:|socks:|https:/d" /etc/environment > /tmp/env  ; cat /tmp/env > /etc/environment
@@ -118,6 +119,9 @@ for tp in "${types[@]}"
 do
 # git
 	git config --global $tp.proxy $tp://$ip:$port
+
+# pip
+  pip config set global.proxy $tp://$ip:$port
 
 # apt
 	printf "Acquire::%s::proxy \"%s://%s:%s/\";\n" "$tp" "$tp" "$ip" "$port" >> /tmp/proxy/apt.conf
