@@ -29,3 +29,10 @@ Options:
 Example: 
 	proxy -i 10.23.201.11 -p 3128 -t http 
 ```
+# Proxy Settings for Windows : 
+Run the Powershell script , or import the file and set your own proxy : 
+```powershell
+$ Set-Proxy 127.0.0.1 8080
+$ Get-Proxy 
+$ Remove-Proxy
+```
